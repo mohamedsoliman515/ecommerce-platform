@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-const addressSchema=new mongoose.Schema({
-    label: {
-        type: String,
-        required: true,
-    },
-    fullName: {
-        type: String,
-        required: true,
-    },
+const addressSchema = new mongoose.Schema({
+  label: {
+    type: String,
+    required: true,
+  },
+  fullName: {
+    type: String,
+    required: true,
+  },
   streetAddress: {
     type: String,
     required: true,
@@ -31,8 +31,8 @@ const addressSchema=new mongoose.Schema({
   isDefault: {
     type: Boolean,
     default: false,
-  }
-})
+  },
+});
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -45,18 +45,20 @@ const userSchema = new mongoose.Schema({
   },
   imageUrl: {
     type: String,
-    default:""
+    default: "",
   },
   clerkId: {
     type: String,
     required: true,
     unique: true,
   },
-  addresses:[addressSchema],
-  wishlist:[{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-  }]
+  addresses: [addressSchema],
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
 });
 
 export const User = mongoose.model("User", userSchema);
