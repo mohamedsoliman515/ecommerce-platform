@@ -6,10 +6,10 @@ import { ENV } from "../config/env.js";
 
 // Authentication
 export const protectRoute = [
-    getAuth(),
+
    async (req, res, next) => {
    try {
-    const { userId } = req.auth;
+    const { userId } = getAuth(req);
 
 
     if (!userId) {
