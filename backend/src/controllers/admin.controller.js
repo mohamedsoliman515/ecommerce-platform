@@ -175,4 +175,33 @@ export async function getAllCustomers(_, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+// 
+export async function getDashboardStats(_, res) {
+  try {
+      
+      const revenueResult = await Order.aggregate([
+          {
+              $group: {
+                  _id: null,
+                  total: { $sum: "$totalPrice" },
+                },
+            },
+        ]);
+        
+        const totalRevenue = revenueResult[0]?.total || 0;
+        
+    const totalOrders = await Order.countDocuments();
+    const totalCustomers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
 
+    res.status(200).json({
+        totalRevenue,
+        totalOrders,
+      totalCustomers,
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
