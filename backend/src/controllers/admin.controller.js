@@ -1,60 +1,60 @@
 import cloudinary from "../config/cloudinary.js";
-import {Product} from "../models/product.model.js";
+import { Product } from "../models/product.model.js";
+import { Order } from "../models/order.model.js";
 
+// products
 export async function createProduct(req, res) {
-    try {
-        const { name, description, price, category, stock } = req.body;
-            if (!name || !description || !price || !category || !stock) {
-                 return res.status(400).json({ message: "All fields are required" });
-            }
+  try {
+    const { name, description, price, category, stock } = req.body;
+    if (!name || !description || !price || !category || !stock) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
     if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: "At least one image is required" });
-    } 
+      return res
+        .status(400)
+        .json({ message: "At least one image is required" });
+    }
 
     if (req.files.length > 3) {
-        return res.status(400).json({ message: "Maximum 3 images allowed" });
+      return res.status(400).json({ message: "Maximum 3 images allowed" });
     }
-    const uploadPromises = req.files.map(file => {
-        return cloudinary.uploader.upload(file.path,{
-            folder: "products"
-        });
+    const uploadPromises = req.files.map((file) => {
+      return cloudinary.uploader.upload(file.path, {
+        folder: "products",
+      });
     });
-    
+
     const uploadResults = await Promise.all(uploadPromises);
-const imagesUrls = uploadResults.map(result => result.url);
+    const imagesUrls = uploadResults.map((result) => result.url);
 
+    const product = await Product.create({
+      name,
+      description,
+      category,
+      price: parseFloat(price),
+      stock: parseInt(stock),
+      images: imagesUrls,
+    });
 
-const product =await Product.create({
-    name,
-    description,
-    category,
-    price : parseFloat(price),
-    stock: parseInt(stock),
-    images:imagesUrls
-});
+    res.status(201).json({ message: "Product created successfully", product });
+  } catch (error) {
+    console.error("Error creating product:", error);
 
-res.status(201).json({ message: "Product created successfully", product });
-
-    } catch (error) {
-        console.error("Error creating product:", error);
-        
-        res.status(500).json({ message: "Internal server error" });
-    }
-
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 export async function getAllProducts(_, res) {
-    try {
-        const products = await Product.find().sort({ createdAt: -1 });
-        res.status(200).json({ message: "Products retrieved successfully", products });
-        
-    } catch (error) {
-        console.error("Error getting products:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res
+      .status(200)
+      .json({ message: "Products retrieved successfully", products });
+  } catch (error) {
+    console.error("Error getting products:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
-
-
 export async function updateProduct(req, res) {
   try {
     const { id } = req.params;
@@ -95,7 +95,6 @@ export async function updateProduct(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -109,7 +108,8 @@ export const deleteProduct = async (req, res) => {
     if (product.images && product.images.length > 0) {
       const deletePromises = product.images.map((imageUrl) => {
         // Extract public_id from URL (assumes format: .../products/publicId.ext)
-        const publicId = "products/" + imageUrl.split("/products/")[1]?.split(".")[0];
+        const publicId =
+          "products/" + imageUrl.split("/products/")[1]?.split(".")[0];
         if (publicId) return cloudinary.uploader.destroy(publicId);
       });
       await Promise.all(deletePromises.filter(Boolean));
@@ -120,5 +120,18 @@ export const deleteProduct = async (req, res) => {
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).json({ message: "Failed to delete product" });
+  }
+};
+// orders
+export const getAllOrders = async (_, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email")
+      .populate("orderItems.product")
+      .sort({ createdAt: -1 });
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Failed to fetch orders" });
   }
 };
