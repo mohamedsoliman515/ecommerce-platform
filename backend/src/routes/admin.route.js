@@ -3,9 +3,11 @@ import {
   createProduct,
   getAllProducts,
   updateProduct,
-  deleteProduct,getAllOrders
-  ,
-  updateOrderStatus
+  deleteProduct,
+  getAllOrders,
+  getAllCustomers,
+  updateOrderStatus,
+  getDashboardStats,
 } from "../controllers/admin.controller.js";
 import { protectRoute, isAdmin } from "../middleware/auth.middleware.js";
 import upload from "../middleware/multer.middleware.js";
