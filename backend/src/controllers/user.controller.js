@@ -47,7 +47,7 @@ export async function addAddress(req, res) {
   }
 }
 
-export const getAddress = (req, res) => {
+export const getAddress = async (req, res) => {
   try {
     const user = req.user;
     res.status(200).json({ addresses: user.addAddress });
@@ -96,14 +96,31 @@ export const updateAddress = async (req, res) => {
 
     res.status(200).json({ message: "Address updated successfully", address });
   } catch (error) {
-    console.log("Error in updateAddress controller:", error);
+    console.error("Error in updateAddress controller:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-export const deleteAddress = (req, res) => {
-  res.status(200).json({ message: "Success" });
+export const deleteAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    if (!addressId) {
+      return res.status(400).json({ error: "Address ID is required" });
+    }
+    const user = req.user;
+    await user.addresses.pull(addressId);
+    await user.save();
+
+    res.status(200).json({ message: "Address deleted successfully" });
+
+  } catch (error) {
+    console.error("Error in deleteAddress controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
+
+
+
 
 export const addToWishlist = (req, res) => {
   res.status(200).json({ message: "Success" });
