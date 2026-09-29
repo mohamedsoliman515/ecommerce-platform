@@ -1,3 +1,4 @@
+
 export async function addAddress(req, res) {
   try {
     const {
@@ -94,7 +95,7 @@ export const updateAddress = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Address updated successfully", address });
+    res.status(200).json({ message: "Address updated successfully", addresses: user.addresses });
   } catch (error) {
     console.error("Error in updateAddress controller:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -120,10 +121,13 @@ export const deleteAddress = async (req, res) => {
 };
 
 
-
+// Wishlist controllers
 
 export const addToWishlist = (req, res) => {
   res.status(200).json({ message: "Success" });
+
+
+
 };
 
 export const getTotalWishlist = (req, res) => {
