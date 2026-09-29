@@ -49,7 +49,18 @@ export async function addAddress(req, res) {
   }
 }
 
+export const getAddress = (req, res) => {
+  try {
+    const user = req.user;
+    res
+      .status(200)
+      .json({ addresses: user.addAddress });
+  } catch (error) {
 
+    console.error("Error in getAddress controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 export const updateAddress = (req, res) => {
   res.status(200).json({ message: "Success" });
