@@ -143,8 +143,24 @@ res.status(200).json({message: "Product added to wishlist", wishlist: user.wishl
 }
 
 
-export const removeFromWishlist = (req, res) => {
-  res.status(200).json({ message: "Success" });
+export const removeFromWishlist = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const user = req.user;
+    // check if this product in  Wishlist
+    if (!user.wishlist.includes(productId)) {
+      return res.status(400).json({ error: "Product not in wishlist" });
+    }
+    user.wishlist.pull(productId);
+    await user.save();
+    res.status(200).json({ message: "Product removed from wishlist", wishlist: user.wishlist });
+  } catch (error) {
+    console.error("Error in removeFromWishlist controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+
+  
 };
 
 export const getTotalWishlist = (req, res) => {
