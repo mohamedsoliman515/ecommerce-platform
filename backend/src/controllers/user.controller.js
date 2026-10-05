@@ -1,3 +1,4 @@
+import User from "../models/user.model.js";
 
 export async function addAddress(req, res) {
   try {
@@ -158,12 +159,17 @@ export const removeFromWishlist = async (req, res) => {
     console.error("Error in removeFromWishlist controller:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-
-
   
 };
 
-export const getTotalWishlist = (req, res) => {
-  res.status(200).json({ message: "Success" });
+export const getTotalWishlist = async (req, res) => {
+  try {
+    const user =await User.findById(req.user._id).populate('wishlist');
+    
+    res.status(200).json({ wishlist: user.wishlist });
+  } catch (error) {
+    console.error("Error in getTotalWishlist controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
