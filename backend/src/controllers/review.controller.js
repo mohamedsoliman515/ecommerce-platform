@@ -65,3 +65,35 @@ export async function createReview(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function deleteReview(req, res) {
+  try {
+    const { reviewId } = req.params;
+
+    const user = req.user;
+
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    if (review.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: "Not authorized to delete this review" });
+    }
+
+    const productId = review.productId;
+    await Review.findByIdAndDelete(reviewId);
+
+    const reviews = await Review.find({ productId });
+    const totalRating = reviews.reduce((sum, rev) => sum + rev.rating, 0);
+    await Product.findByIdAndUpdate(productId, {
+      averageRating: reviews.length > 0 ? totalRating / reviews.length : 0,
+      totalReviews: reviews.length,
+    });
+
+    res.status(200).json({ message: "Review deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteReview controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
