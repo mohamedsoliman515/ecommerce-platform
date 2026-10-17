@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 import path from "path";
 import { serve } from "inngest/express";
 import { inngest, functions } from "./config/inngest.js";
+import cors from "cors";
 // routes
 import adminRoutes from "./routes/admin.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -18,14 +19,20 @@ const app = express();
 
 app.use(express.json());
 app.use(clerkMiddleware());
+app.use(cors({
+  origin: ENV.CLENT_URL,
+  credentials: true,
+  // allow credentials from the client
+}));
+
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-app.use("/api/admin",adminRoutes)
-app.use("/api/users",userRoutes)
-app.use("/api/orders",orderRoutes)
-app.use("/api/products",productRoutes)
-app.use("/api/reviews",reviewRoutes)
-app.use("/api/cart",cartRoutes)
+app.use("/api/admin", adminRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/orders", orderRoutes)
+app.use("/api/products", productRoutes)
+app.use("/api/reviews", reviewRoutes)
+app.use("/api/cart", cartRoutes)
 
 
 
