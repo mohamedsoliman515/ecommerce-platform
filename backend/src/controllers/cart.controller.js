@@ -1,4 +1,5 @@
 import { Cart } from "../models/cart.model";
+import { Product } from "../models/product.model";
 
 export async function getCart(req, res) {
     try {
@@ -21,6 +22,57 @@ export async function getCart(req, res) {
         res.status(200).json({ cart });
     } catch (error) {
         console.error("Error in getCart controller:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export async function addToCart(req, res) {
+    try {
+        const { productId, quantity = 1 } = req.body;
+
+        // validate product exists and has stock
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        if (product.stock < quantity) {
+            return res.status(400).json({ error: "Insufficient stock" });
+        }
+
+        let cart = await Cart.findOne({ clerkId: req.user.clerkId });
+
+        if (!cart) {
+            const user = req.user;
+
+            cart = await Cart.create({
+                user: user._id,
+                clerkId: user.clerkId,
+                items: [],
+            });
+        }
+
+        // check if item already in the cart
+        const existingItem = cart.items.find((item) => item.product.toString() === productId);
+
+        if (existingItem) {
+
+            // increment quantity by 1
+            const newQuantity = existingItem.quantity + quantity;
+            if (product.stock < newQuantity) {
+                return res.status(400).json({ error: "Insufficient stock" });
+            }
+            existingItem.quantity = newQuantity;
+        } else {
+            // add new item
+            cart.items.push({ productId: productId, quantity });
+        }
+
+        await cart.save();
+
+        res.status(200).json({ message: "Item added to cart", cart });
+    } catch (error) {
+        console.error("Error in addToCart controller:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 }
