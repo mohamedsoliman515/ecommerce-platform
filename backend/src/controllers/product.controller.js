@@ -1,8 +1,8 @@
-import Product from "../models/product.model.js";
+import { Product } from "../models/product.model.js";
 
 export async function getProductById(req, res) {
-    try {
-      const {id}=req.params;
+  try {
+    const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });

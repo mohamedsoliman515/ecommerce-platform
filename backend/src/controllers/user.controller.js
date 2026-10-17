@@ -1,4 +1,4 @@
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 
 export async function addAddress(req, res) {
   try {
@@ -124,23 +124,23 @@ export const deleteAddress = async (req, res) => {
 
 // Wishlist controllers
 
-export const addToWishlist = async(req, res) => {
-    try { 
-const{productId} = req.body;
-const user = req.user;
-if(!productId){
-    return res.status(400).json({error: "Product ID is required"});
-}
-if(user.wishlist.includes(productId)){
-    return res.status(400).json({error: "Product already in wishlist"});
-}
-user.wishlist.push(productId);
-await user.save();
-res.status(200).json({message: "Product added to wishlist", wishlist: user.wishlist});
-    } catch (error) {
-        console.error("Error in addToWishlist controller:", error);
-        res.status(500).json({ error: "Internal server error" });
+export const addToWishlist = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const user = req.user;
+    if (!productId) {
+      return res.status(400).json({ error: "Product ID is required" });
     }
+    if (user.wishlist.includes(productId)) {
+      return res.status(400).json({ error: "Product already in wishlist" });
+    }
+    user.wishlist.push(productId);
+    await user.save();
+    res.status(200).json({ message: "Product added to wishlist", wishlist: user.wishlist });
+  } catch (error) {
+    console.error("Error in addToWishlist controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 
@@ -159,13 +159,13 @@ export const removeFromWishlist = async (req, res) => {
     console.error("Error in removeFromWishlist controller:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-  
+
 };
 
 export const getTotalWishlist = async (req, res) => {
   try {
-    const user =await User.findById(req.user._id).populate('wishlist');
-    
+    const user = await User.findById(req.user._id).populate('wishlist');
+
     res.status(200).json({ wishlist: user.wishlist });
   } catch (error) {
     console.error("Error in getTotalWishlist controller:", error);

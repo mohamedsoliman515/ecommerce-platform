@@ -1,7 +1,7 @@
-import {Router} from "express";
-import { protectRoute } from "../middleware/auth.middleware";
-import { getAllProducts } from "../controllers/admin.controller";
-import { getProductById } from "../controllers/product.controller";
+import { Router } from "express";
+import { protectRoute } from "../middlewares/auth.middleware.js";
+import { getAllProducts } from "../controllers/admin.controller.js";
+import { getProductById } from "../controllers/product.controller.js";
 
 const router = Router();
 router.use(protectRoute);
