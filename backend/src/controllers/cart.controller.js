@@ -76,3 +76,56 @@ export async function addToCart(req, res) {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export async function updateCartItem(req, res) {
+    try {
+        const { productId } = req.params;
+        const { quantity } = req.body;
+
+        // Validate product ID
+        if (!mongoose.isValidObjectId(productId)) {
+            return res.status(400).json({
+                error: "Invalid product ID",
+            });
+        }
+        // Validate quantity
+        const qty = Number(quantity);
+        if (
+            quantity === undefined ||
+            quantity === null ||
+            quantity === "" ||
+            (typeof quantity !== "number" &&
+                typeof quantity !== "string") ||
+            !Number.isSafeInteger(qty) ||
+            qty < 1
+        ) {
+            return res.status(400).json({
+                error: "Quantity must be a positive integer",
+            });
+        }
+        // find cart by clerkId
+        const cart = await Cart.findOne({ clerkId: req.user.clerkId });
+        if (!cart) {
+            return res.status(404).json({ error: "Cart not found" });
+        }
+        // find item in cart
+        const itemIndex = cart.items.findIndex((item) => item.product.toString() === productId);
+        if (itemIndex === -1) {
+            return res.status(404).json({ error: "Item not found in cart" });
+        }
+        // check if product exists & validate stock
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+        if (product.stock < qty) {
+            return res.status(400).json({ error: "Insufficient stock" });
+        }
+        cart.items[itemIndex].quantity = qty;
+        await cart.save();
+        res.status(200).json({ message: "Cart updated successfully", cart });
+    } catch (error) {
+        console.error("Error in updateCartItem controller:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
