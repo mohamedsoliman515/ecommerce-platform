@@ -133,11 +133,27 @@ export async function removeFromCart(req, res) {
     try {
         const { productId } = req.params;
 
+        //  Validate product ID format
+        if (!mongoose.isObjectIdOrHexString(productId)) {
+            return res.status(400).json({
+                error: "Invalid product ID",
+            });
+        }
         const cart = await Cart.findOne({ clerkId: req.user.clerkId });
         if (!cart) {
             return res.status(404).json({ error: "Cart not found" });
         }
 
+        //  Check whether the item exists in this cart
+        const itemExists = cart.items.some(
+            (item) => item.product.toString() === productId
+        );
+
+        if (!itemExists) {
+            return res.status(404).json({
+                error: "Item not found in cart",
+            });
+        }
         cart.items = cart.items.filter((item) => item.product.toString() !== productId);
         await cart.save();
 
