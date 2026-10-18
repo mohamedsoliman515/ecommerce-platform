@@ -1,13 +1,14 @@
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
+
+
 const App = () => {
   return (
-     <>
-     <h1></h1>
-      <header>
+    <>
 
+      <header>
         <Show when="signed-out">
-          <SignInButton/>
-          <SignUpButton/>
+          <SignInButton />
+          <SignUpButton />
         </Show>
 
         <Show when="signed-in">
