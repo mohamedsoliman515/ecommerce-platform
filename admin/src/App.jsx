@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage.jsx";
 import ProductsPage from "./pages/ProductsPage.jsx";
 import OrdersPage from "./pages/OrdersPage.jsx";
 import CustomersPage from "./pages/CustomersPage.jsx";
+import PageLoader from "./components/PageLoader.jsx";
 
 
 
@@ -15,7 +16,7 @@ const App = () => {
   console.log(isSignedIn);
 
 if (!isLoaded) {
-  return <div>Loading...</div>
+  return <PageLoader />
 }
   return (
     <Routes>
