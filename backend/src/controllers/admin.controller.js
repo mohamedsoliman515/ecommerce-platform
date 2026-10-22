@@ -1,7 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
 import { Product } from "../models/product.model.js";
 import { Order } from "../models/order.model.js";
-
+import { User } from "../models/user.model.js";
 // products
 export async function createProduct(req, res) {
   try {
@@ -139,9 +139,9 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-if (!["pending","shipped", "delivered"].includes(status)) {
-    return res.status(400).json({ message: "Invalid status" });
-}
+    if (!["pending", "shipped", "delivered"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
 
 
 
@@ -151,14 +151,14 @@ if (!["pending","shipped", "delivered"].includes(status)) {
     }
 
     order.status = status;
-    if(status === "shipped" && !order.shippedAt) {
+    if (status === "shipped" && !order.shippedAt) {
       order.shippedAt = new Date();
     }
-    if(status === "delivered" && !order.deliveredAt) {
+    if (status === "delivered" && !order.deliveredAt) {
       order.deliveredAt = new Date();
     }
     await order.save();
-    res.status(200).json({message: "Order status updated successfully", order});
+    res.status(200).json({ message: "Order status updated successfully", order });
   } catch (error) {
     console.error("Error updating order status:", error);
     res.status(500).json({ message: "Failed to update order status" });
@@ -178,25 +178,25 @@ export async function getAllCustomers(_, res) {
 // 
 export async function getDashboardStats(_, res) {
   try {
-      
-      const revenueResult = await Order.aggregate([
-          {
-              $group: {
-                  _id: null,
-                  total: { $sum: "$totalPrice" },
-                },
-            },
-        ]);
-        
-        const totalRevenue = revenueResult[0]?.total || 0;
-        
+
+    const revenueResult = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const totalRevenue = revenueResult[0]?.total || 0;
+
     const totalOrders = await Order.countDocuments();
     const totalCustomers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
 
     res.status(200).json({
-        totalRevenue,
-        totalOrders,
+      totalRevenue,
+      totalOrders,
       totalCustomers,
       totalProducts,
     });
