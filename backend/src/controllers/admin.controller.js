@@ -26,7 +26,9 @@ export async function createProduct(req, res) {
     });
 
     const uploadResults = await Promise.all(uploadPromises);
-    const imagesUrls = uploadResults.map((result) => result.url);
+    const imagesUrls = uploadResults.map(
+      (result) => result.secure_url
+    );
 
     const product = await Product.create({
       name,
@@ -34,6 +36,7 @@ export async function createProduct(req, res) {
       category,
       price: parseFloat(price),
       stock: parseInt(stock),
+      imageUrl: imagesUrls[0],
       images: imagesUrls,
     });
 
@@ -55,7 +58,9 @@ export async function getAllProducts(_, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
 export async function updateProduct(req, res) {
+
   try {
     const { id } = req.params;
     const { name, description, price, stock, category } = req.body;
@@ -73,21 +78,33 @@ export async function updateProduct(req, res) {
     if (category) product.category = category;
 
     // handle image updates if new images are uploaded
-    if (req.files && req.files.length > 0) {
-      if (req.files.length > 3) {
-        return res.status(400).json({ message: "Maximum 3 images allowed" });
+    if (req.files?.length > 0) {
+      const existingImages = product.images?.length
+        ? product.images
+        : product.imageUrl
+          ? [product.imageUrl]
+          : [];
+
+      if (existingImages.length + req.files.length > 3) {
+        return res.status(400).json({
+          message: "Maximum 3 images allowed",
+        });
       }
 
-      const uploadPromises = req.files.map((file) => {
-        return cloudinary.uploader.upload(file.path, {
-          folder: "products",
-        });
-      });
-
-      const uploadResults = await Promise.all(uploadPromises);
-      product.images = uploadResults.map((result) => result.secure_url);
+      const uploadResults = await Promise.all(
+        req.files.map((file) =>
+          cloudinary.uploader.upload(file.path, {
+            folder: "products",
+          })
+        )
+      );
+      const newImageUrls = uploadResults.map(
+        (result) => result.secure_url
+      );
+      const allImages = [...existingImages, ...newImageUrls];
+      product.images = allImages;
+      product.imageUrl = allImages[0];
     }
-
     await product.save();
     res.status(200).json(product);
   } catch (error) {
