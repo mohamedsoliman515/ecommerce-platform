@@ -158,7 +158,6 @@ const seedDatabase = async () => {
         // Insert seed products
         const productsToInsert = products.map(({ images, ...product }) => ({
             ...product,
-            imageUrl: images?.[0],
             images,
         }));
 
