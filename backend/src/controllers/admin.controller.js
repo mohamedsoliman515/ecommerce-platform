@@ -26,7 +26,7 @@ export async function createProduct(req, res) {
     });
 
     const uploadResults = await Promise.all(uploadPromises);
-    const imagesUrls = uploadResults.map(
+    const images = uploadResults.map(
       (result) => result.secure_url
     );
 
@@ -36,8 +36,7 @@ export async function createProduct(req, res) {
       category,
       price: parseFloat(price),
       stock: parseInt(stock),
-      imageUrl: imagesUrls[0],
-      images: imagesUrls,
+      images,
     });
 
     res.status(201).json({ message: "Product created successfully", product });
@@ -79,11 +78,7 @@ export async function updateProduct(req, res) {
 
     // handle image updates if new images are uploaded
     if (req.files?.length > 0) {
-      const existingImages = product.images?.length
-        ? product.images
-        : product.imageUrl
-          ? [product.imageUrl]
-          : [];
+      const existingImages = product.images;
 
       if (existingImages.length + req.files.length > 3) {
         return res.status(400).json({
@@ -101,9 +96,7 @@ export async function updateProduct(req, res) {
       const newImageUrls = uploadResults.map(
         (result) => result.secure_url
       );
-      const allImages = [...existingImages, ...newImageUrls];
-      product.images = allImages;
-      product.imageUrl = allImages[0];
+      product.images = [...existingImages, ...newImageUrls];
     }
     await product.save();
     res.status(200).json(product);
