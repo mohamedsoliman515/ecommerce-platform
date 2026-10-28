@@ -6,6 +6,7 @@
     "@clerk/expo": "^4.14.1",
     "@expo/ui": "~58.0.23",
     "@tanstack/react-query": "^5.104.5",
+    "axios": "^1.21.0",
     "expo": "^58.0.0",
     "expo-auth-session": "~58.0.14",
     "expo-constants": "~58.0.13",
